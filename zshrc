@@ -110,3 +110,23 @@ alias nas-ssh="ssh nas"
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 source "${HOME}/.zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# https://wallabag.budenny.net/view/9359
+# requires fzf, bat, ripgrep
+qs() {
+    RG_PREFIX="rg --files-with-matches"
+    local file
+    file="$(
+        FZF_DEFAULT_COMMAND="$RG_PREFIX '$1'" \
+            fzf \
+            --preview="[[ ! -z {} ]] && rg --pretty --context 5 {q} {}" \
+            --disabled --query "$1" \
+            --bind "change:reload:sleep 0.1; $RG_PREFIX {q}" \
+            --bind "f3:execute(bat --paging=always --pager=less --color=always {} < /dev/tty > /dev/tty)" \
+            --bind "f4:execute(code {})" \
+            --preview-window="70%:wrap"
+    )" &&
+        echo "$file"
+}
